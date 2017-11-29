@@ -113,18 +113,18 @@ public class UnitedAirlinesFactory {
 		return strLine[0];
 	}
 	
-	private static void loadSchema(String propFileName, String schemaFile) throws Exception {
+	private static void loadSchema(String propFileName, String schemaFile, String groovyFile) throws Exception {
 
 		JanusGraph g = JanusGraphFactory.open(propFileName);
 				
-		loadSchema(g, schemaFile);
+		loadSchema(g, schemaFile, groovyFile);
 		
 		g.close();
     }
 	
-	private static void loadSchema(JanusGraph g, String schemaFile) throws Exception {
+	private static void loadSchema(JanusGraph g, String schemaFile, String groovyFile) throws Exception {
 		GroovyClassLoader gcl = new GroovyClassLoader();
-		Class groovyclass = gcl.parseClass(new File ("src/main/groovy/JanusgraphGSONSchema.groovy"));
+		Class groovyclass = gcl.parseClass(new File (groovyFile));
 		
 		Constructor constructor = groovyclass.getConstructor(new Class[]{JanusGraph.class});
 		Object scriptInstance = constructor.newInstance(g);
@@ -205,36 +205,30 @@ public class UnitedAirlinesFactory {
 				Boolean flyFri = qualifyToFly(32, Integer.parseInt(LegBitMask));
 				Boolean flySat = qualifyToFly(64, Integer.parseInt(LegBitMask));
 
-//				Iterator<Edge> iter = tx.traversal().V().has("StationCode",departAirport).outE("routes").has("FlightNumber",Integer.parseInt(FlightNumber)).has("AircraftSTDString",AircraftSTD).has("LegEffectiveDateString",LegEffectiveDate);
-//				
-//				if (iter.hasNext()) {
-//					// do nothing
-//				} else {
 				
-					departVertex.addEdge("routes", arrivalVertex, 
-							"ID", ID,
-							"FlightIdentifier", FlightIdentifier, 
-							"FlightNumber", Integer.parseInt(FlightNumber),
-							"AircraftSTDString",AircraftSTD,
-							"AircraftSTD",departTime,
-							"AircraftSTA",arrivalTime,
-							"FlightDistance",FlightDistance,
-							"FlightDuration",FlightDuration,
-							"LegEffectiveDateString", LegEffectiveDate,
-							"LegEffectiveDate", startDate,
-							"LegDiscountinueDate", endDate,
-							"FlyMon", flyMon,
-							"FlyTue", flyTue,
-							"FlyWed", flyWed,
-							"FlyThu", flyThu,
-							"FlyFri", flyFri,
-							"FlySat", flySat,
-							"FlySun", flySun,
-							"FromAirport", departAirport,
-							"ToAirport", arrivalAirport,
-							"LegBitMask", LegBitMask
-							);
-//				}
+				departVertex.addEdge("routes", arrivalVertex, 
+						"ID", ID,
+						"FlightIdentifier", FlightIdentifier, 
+						"FlightNumber", Integer.parseInt(FlightNumber),
+						"AircraftSTDString",AircraftSTD,
+						"AircraftSTD",departTime,
+						"AircraftSTA",arrivalTime,
+						"FlightDistance",FlightDistance,
+						"FlightDuration",FlightDuration,
+						"LegEffectiveDateString", LegEffectiveDate,
+						"LegEffectiveDate", startDate,
+						"LegDiscountinueDate", endDate,
+						"FlyMon", flyMon,
+						"FlyTue", flyTue,
+						"FlyWed", flyWed,
+						"FlyThu", flyThu,
+						"FlyFri", flyFri,
+						"FlySat", flySat,
+						"FlySun", flySun,
+						"FromAirport", departAirport,
+						"ToAirport", arrivalAirport,
+						"LegBitMask", LegBitMask
+						);
 				
 				if (currentLine % BATCH_NUM == 0) {
 					try {
@@ -271,13 +265,17 @@ public class UnitedAirlinesFactory {
 
 	public static void main(String args[]) throws Exception {
 		if (null == args || args.length < 3) {
-			System.err.println("Usage: UnitedAirlinesFactory <janusgraph-config-file> <schema-file> <data-file>");
+			System.err.println("Usage: UnitedAirlinesFactory <janusgraph-config-file> <schema-file> <data-file> {groovy-file}");
 			System.exit(1);
 		}
 
 		org.apache.log4j.LogManager.getRootLogger().setLevel(Level.INFO);
-
-		loadSchema(args[0], args[1]);
+        
+		String groovyFile = "src/main/groovy/JanusgraphGSONSchema.groovy";
+		if (args.length > 3)
+			groovyFile = args[3];
+		
+		loadSchema(args[0], args[1], groovyFile);
 		loadData(args[0], args[2]);
 
 		System.exit(0);
