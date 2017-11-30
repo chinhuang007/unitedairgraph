@@ -1,10 +1,12 @@
 # unitedairgraph
 
-To load schema and data:
+To load schema and data into JanusGraph:
 
 Run UnitedAirlinesFactory in Eclipse
+prereqs: install JanusGraph and add all jars in /janusgraph/lib folder to the java project library list
+usage: UnitedAirlinesFactory <janusgraph-config-file> <schema-file> <data-file> <groovy-file>
 
-usage: UnitedAirlinesFactory <janusgraph-config-file> <data-files-directory>
+Note that the schema-file and groovy-file are schema_ua.json and JanusgraphGSONSchema.groovy, in /src/main/groovy folder.
 
 To query flights:
 
